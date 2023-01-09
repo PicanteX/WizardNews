@@ -8,7 +8,7 @@ app.use(express.static('public'))
 
 app.use(morgan('dev'));
 
-const PORT = 1337;
+const {PORT = 1337} = process.env
 
 app.listen(PORT, () => {
   console.log(`App listening in port ${PORT}`);
@@ -49,8 +49,14 @@ app.get('/', (req, res) => {
 
 
 app.get('/posts/:id', (req, res) => {
+
   const id = req.params.id;
   const post = postBank.find(id);
+
+  if (!post.id) {
+    throw new Error('Posted content not found')
+
+  } else {
 
   const html = `<!DOCTYPE html>
   <html>
@@ -74,5 +80,27 @@ app.get('/posts/:id', (req, res) => {
 </body>
 </html>
 `
+  res.send(html)
+}});
+
+app.use((err,req,res,next) => {
+
+  const html= `<!DOCTYPE html>
+  <html>
+  <head>
+      <title>Wizard News</title>
+      <link rel="stylesheet" href="/style.css" />
+  </head>
+  <body>
+      <div class="news-list">
+      <header><img src="/logo.png"/>Wizard News</header>
+          <div class='news-item'>
+              <h1>${err}</h1>
+          </div>
+      </div>
+  </body>
+  </html>
+  `
+
   res.send(html)
 });
